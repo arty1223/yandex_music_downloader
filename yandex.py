@@ -50,5 +50,5 @@ try:
     took {datetime.now() - time}""")
     input()
 except KeyboardInterrupt:
-        file.close()
-        print(f'interupt {filename} {round(i/(amount-1)*100,1)}%')
+    file.close()
+    print(f'interupt {filename} {round(i/(amount-1)*100,1)}%')

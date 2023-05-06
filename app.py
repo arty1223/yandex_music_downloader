@@ -33,7 +33,7 @@ time = datetime.now()
 file = open("playlist.txt","w")
 try:
     for i in range(amount):
-        track = client.users_likes_tracks()[215].fetch_track()
+        track = client.users_likes_tracks()[i].fetch_track()
         try:
             artist = track['artists'][0]['name']
             filename = fncheck(f"{track['title']} - {artist}.mp3")

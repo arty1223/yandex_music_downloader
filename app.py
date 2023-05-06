@@ -29,19 +29,26 @@ def fncheck(filename : str):
     return result
 
 time = datetime.now()
-for i in range(amount):
-    track = client.users_likes_tracks()[i].fetch_track()
-    try:
-        artist = track['artists'][0]['name']
-        filename = fncheck(f"{track['title']} - {artist}.mp3")
-    except:
-        print("no artist")
-        filename = fncheck(f"{track['title']}.mp3")
-    print (f"{filename} curent track {i} from {amount-1}, {round(i/(amount-1)*100,1)}%")
-    if path.exists(filename):
-        print('skip')
-        continue
-    client.users_likes_tracks()[i].fetch_track().download(filename)   
-print(f"""done!
-took {datetime.now() - time}""")
-input()
+file = open("playlist.txt","w")
+try:
+    for i in range(amount):
+        track = client.users_likes_tracks()[i].fetch_track()
+        try:
+            artist = track['artists'][0]['name']
+            filename = fncheck(f"{track['title']} - {artist}.mp3")
+        except:
+            print("no artist")
+            filename = fncheck(f"{track['title']}.mp3")
+        print (f"{filename} curent track {i} from {amount-1}, {round(i/(amount-1)*100,1)}%")
+        file.write(f'{filename}\n')
+        if path.exists(filename):
+            print('skip')
+            continue
+        client.users_likes_tracks()[i].fetch_track().download(filename)   
+    file.close()
+    print(f"""done!
+    took {datetime.now() - time}""")
+    input()
+except KeyboardInterrupt:
+    file.close()
+    print(f'interupt {filename} {round(i/(amount-1)*100,1)}%')

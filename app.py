@@ -1,9 +1,9 @@
 from yandex_music import Client
 from os import mkdir, chdir, path
 from datetime import datetime
-from token_file import token
 
-try:    
+try:
+    from token_file import token
     client = Client(token).init()    
 except:
     print("ошибка аутентификации")

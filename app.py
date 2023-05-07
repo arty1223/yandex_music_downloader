@@ -32,8 +32,8 @@ if __name__ == '__main__':
     time = datetime.now()
     file = open("playlist.txt","w",encoding="utf-8")
     try:
-        for i in range(amount):
-            track = client.users_likes_tracks()[215].fetch_track()
+        for i in range(amount):            
+            track = client.users_likes_tracks()[i].fetch_track()
             try:
                 artist = track['artists'][0]['name']
                 filename = fncheck(f"{track['title']} - {artist}.mp3")
@@ -48,7 +48,7 @@ if __name__ == '__main__':
             client.users_likes_tracks()[i].fetch_track().download(filename)   
         file.close()
         print(f"""done!
-        took {datetime.now() - time}""")
+took {datetime.now() - time}""")
         input()
     except KeyboardInterrupt:
         file.close()

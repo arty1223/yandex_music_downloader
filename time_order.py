@@ -1,6 +1,7 @@
 from yandex_music import Client
-from os import mkdir, chdir, path
+from os import mkdir, chdir, path, utime
 from datetime import datetime
+from random import randint
 
 
 def fncheck(filename : str):
@@ -9,6 +10,9 @@ def fncheck(filename : str):
             if i in '<>:"/\|?*':
                 result = result.replace(i,"")     
         return result
+
+def set_time(file_path,a):    
+    utime(file_path, (datetime.now().timestamp(), datetime.now().timestamp()+a))
 
 
 if __name__ == '__main__':
@@ -22,16 +26,13 @@ if __name__ == '__main__':
         file.close()
         input('saved, press enter to exit ')
         exit()
-
     try:
         chdir('yandex_music')
     except:
         mkdir('yandex_music')
         chdir('yandex_music')
 
-
-    amount = len(client.users_likes_tracks())    
-
+    amount = len(client.users_likes_tracks())
     time = datetime.now()
     file = open("playlist.txt","w",encoding="utf-8")
     try:
@@ -43,12 +44,14 @@ if __name__ == '__main__':
             except:
                 print("no artist")
                 filename = fncheck(f"{track['title']}.mp3")
-            print (f"{filename} curent track {i} from {amount-1}, {round(i/(amount-1)*100,1)}%")
-            file.write(f'{filename}\n')
+            print (f"{filename} curent track {i+1} from {amount}, {round(i/(amount-1)*100,1)}%")
+            file.write(f'{filename}\n')            
             if path.exists(filename):
+                set_time(filename,i)
                 print('skip')
                 continue
-            client.users_likes_tracks()[i].fetch_track().download(filename)   
+            client.users_likes_tracks()[i].fetch_track().download(filename)
+            set_time(filename,i)  
         file.close()
         print(f"""done!
 took {datetime.now() - time}""")

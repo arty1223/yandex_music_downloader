@@ -1,7 +1,6 @@
 from yandex_music import Client
 from os import mkdir, chdir, path, utime
 from datetime import datetime
-from random import randint
 
 
 def fncheck(filename : str):
@@ -32,12 +31,14 @@ if __name__ == '__main__':
         mkdir('yandex_music')
         chdir('yandex_music')
 
-    amount = len(client.users_likes_tracks())
+    tracklist = client.users_likes_tracks()
+    amount = len(tracklist)    
+
     time = datetime.now()
-    file = open("playlist.txt","w",encoding="utf-8")
+    playlistfile = open("playlist.txt","w",encoding="utf-8")
     try:
         for i in range(amount):            
-            track = client.users_likes_tracks()[i].fetch_track()
+            track = tracklist[i].fetch_track()
             try:
                 artist = track['artists'][0]['name']
                 filename = fncheck(f"{track['title']} - {artist}.mp3")
@@ -45,17 +46,17 @@ if __name__ == '__main__':
                 print("no artist")
                 filename = fncheck(f"{track['title']}.mp3")
             print (f"{filename} curent track {i+1} from {amount}, {round(i/(amount-1)*100,1)}%")
-            file.write(f'{filename}\n')            
+            playlistfile.write(f'{filename}\n')            
             if path.exists(filename):
                 set_time(filename,i)
                 print('skip')
                 continue
-            client.users_likes_tracks()[i].fetch_track().download(filename)
+            track.download(filename)
             set_time(filename,i)  
-        file.close()
+        playlistfile.close()
         print(f"""done!
 took {datetime.now() - time}""")
         input()
     except KeyboardInterrupt:
-        file.close()
+        playlistfile.close()
         print(f'interupt {filename} {round(i/(amount-1)*100,1)}%')

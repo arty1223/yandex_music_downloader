@@ -1,7 +1,19 @@
 from yandex_music import Client
 from os import mkdir, chdir, path
 from datetime import datetime
-
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3, APIC, error
+picture = 0
+def set_cover(filename : str, cvr : str):
+    if not picture: return
+    audio = MP3(filename, ID3=ID3)
+    try:
+        audio.add_tags()
+    except error:
+        pass
+    audio.tags.add(APIC(mime='image/png',type=3,desc=u'Cover',data=open(cvr,'rb').read()))
+    audio.save()
+    print('set cover', cvr)
 
 def fncheck(filename : str):
         result = filename
@@ -46,10 +58,12 @@ if __name__ == '__main__':
                 filename = fncheck(f"{track['title']}.mp3")
             print (f"{filename} curent track {i} from {amount-1}, {round(i/(amount-1)*100,1)}%")
             playlistfile.write(f'{filename}\n')
-            if path.exists(filename):
+            if path.exists(filename):                
+                set_cover(filename,'cover.png')                
                 print('skip')
                 continue
-            track.download(filename)   
+            track.download(filename)
+            set_cover(filename,'cover.png')            
         playlistfile.close()
         print(f"""done!
 took {datetime.now() - time}""")

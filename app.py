@@ -3,7 +3,7 @@ from os import mkdir, chdir, path
 from datetime import datetime
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, error
-picture = 0
+picture = false # set to true if covers required
 def set_cover(filename : str, cvr : str):
     if not picture: return
     audio = MP3(filename, ID3=ID3)

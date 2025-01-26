@@ -1,9 +1,1 @@
-yandex_music/*
-yandex_music
-test/*
-.idea/*
-.vscode/*
-__pycache__
-token_file.py
-yandex.py
-todo.txt
+*

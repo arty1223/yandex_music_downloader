@@ -46,6 +46,11 @@ def set_metadata(filename: str, track: dict):
 
 if __name__ == "__main__":
     fix = False
+    bitrate = 192
+    codec = "mp3"
+    recovery = False
+    directory = ""  
+
     try:
         from token_file import token
 
@@ -61,16 +66,52 @@ if __name__ == "__main__":
         input("Сохранено, нажмите enter чтобы выйти")
         exit()
 
+    # костыль для отработки состояния по умолчанию
+    tracklist = client.users_likes_tracks()
+    if path.exists("yandex_music"):
+            chdir("yandex_music")
+    else:
+        mkdir("yandex_music")
+        chdir("yandex_music")
+
+
     if len(sys.argv) > 1:
         i = 1
         while i < len(sys.argv):
             match sys.argv[i]:
-                case "-fix":
+                case "-dir":
+                    i += 1
+                    directory = sys.argv[i]
+                    chdir("../")
+                    try:                    
+                        if path.exists(directory):
+                            chdir(directory)
+                        else:
+                            mkdir(directory)
+                            chdir(directory)
+                    except PermissionError:
+                        print("Недостаточно прав")
+                        exit()
+                case "-codec":
+                    i += 1
+                    codec = sys.argv[i]
+                    if codec not in ("mp3", "aac"):
+                        print(
+                            "Неизвестное значение кодека. Известные значения: mp3, aac."
+                        )
+                        exit()
+                case "-bitrate":
+                    i += 1
+                    bitrate = int(sys.argv[i])
+                    if bitrate not in (64, 128, 192, 320):
+                        print(
+                            "Неизвестное значение битрейта. Известные значения: 64, 128, 192, 320."
+                        )
+                        exit()
+                case "-fix_metadata":
                     question = input(
                         """ВНИМАНИЕ!
-Выбран режим восстановления аудиотеки, это значит 
-что программа восстановит обложки и метаданные
-всех аудиофайлов в директории,
+Выбран режим восстановления метаданных и обложек всех аудиофайлов в директории,
 загрузка займет примерно такое же время, как в первый раз!
 Нажмите любую клавишу чтобы продолжить, 'q' для выхода\n"""
                     )
@@ -78,44 +119,59 @@ if __name__ == "__main__":
                         exit()
                     else:
                         fix = True
+                        print("Метаданные и обложки будут восстановлены")
+                case "-recovery":
+                    question = input(
+                        """ВНИМАНИЕ!
+Выбран режим восстановления аудиотеки, это значит что программа загрузит заново все треки в плейлисте а также их обложки и метаданные.
+Загрузка займет такое же время, как в первый раз!
+Нажмите любую клавишу чтобы продолжить, 'q' для выхода\n"""
+                    )
+                    if question.lower() in ("qй") and question:
+                        exit()
+                    else:
+                        recovery = True
+                        fix = True
                         print("Аудиотека будет восстановлена")
-                case "-pl": # Выбор плейлиста и создание треклиста на его основе                    
+                case "-pl":  # Выбор плейлиста и создание треклиста на его основе
                     i += 1
                     link = sys.argv[i]
-                    link = link.split('/')
+                    link = link.split("/")
                     user = link[4]
-                    playlistId = link[-1][:link[-1].index('?')]
-                    playlist = client.users_playlists(
-                        kind = playlistId, user_id = user
-                    )
-                    playlistName = playlist.title  
+                    playlistId = link[-1][: link[-1].index("?")]
+                    playlist = client.users_playlists(kind=playlistId, user_id=user)
+                    playlistName = playlist.title
                     tracklist = playlist.fetch_tracks()
                     track = tracklist[0].fetch_track()
-                    if path.exists(playlistName):
-                        chdir(playlistName)
+                    if path.exists('../'+playlistName):
+                        chdir('../'+playlistName)
                     else:
-                        mkdir(playlistName)
-                        chdir(playlistName)
+                        mkdir('../'+playlistName)
+                        chdir('../'+playlistName)
                     #    track.download(track["title"]+'.mp3')
                     print(f"Загрузка плейлиста {playlistName}")
-                case _:
+                case "-help":
                     print(
-                        """Неизвестный аргумент
-Список команд:
-    -fix - восстановление аудиотеки
-    -pl "link" - загрузка плейлиста по ссылке\n"""
+                        """ВАЖНО! 
+    При использвании команд восстановления необходимо предоставить ссылку на плейлист который требуется 
+восстановить, иначе будет восстановлен плейлист "Мне нравится"
+    При вызове без команд будет загружен плейлист "Мне нравится" со значениями по умолчанию.
+
+                          
+Список команд
+    -fix_metadata - восстановление аудиотеки (только метаданные и обложки)
+    -recovery - полное восстановление аудиотеки (загрузка всех треков по новой, обложек и метаданных к ним)
+    -pl "link" - загрузка плейлиста по ссылке. Если не указано загружается плейлист "Мне нравится"
+    -codec <codec> - выбор формата файла музыки (mp3/aac) по умолчанию - mp3
+    -bitrate <bitrate> - выбор битрейта (64, 128, 192, 320) по умолчанию - 192
+    -dir <path_to_directory> - директория в которую будет загружена музыка если пути нет и прав достаточно - директория будет создана\n"""
                     )
                     exit()
-                
+                case _:
+                    print("""Неизвестный аргумент""")
+                    exit()
             i += 1
-    else: # Выбор по умолчанию (если не даны никакие аргументы) - загрузка плейлиста "Мне нравится"
-        tracklist = client.users_likes_tracks()
-        if path.exists("yandex_music"):
-            chdir("yandex_music")
-        else:
-            mkdir("yandex_music")
-            chdir("yandex_music")
-
+ 
     amount = len(tracklist)
     print(f"amount of tracks: {amount}")
     time = datetime.now()
@@ -171,11 +227,12 @@ if __name__ == "__main__":
                     print("обложка установлена")
                     set_metadata(filename, track)
                     continiuty -= 1
-                print("файл существует, пропуск")
                 continiuty += 1
-                continue
+                if not recovery:
+                    print("файл существует, пропуск")
+                    continue
             continiuty = 0
-            track.download(filename)
+            track.download(filename, codec=codec, bitrate_in_kbps=bitrate)
             track.download_cover("cover.jpg", size="1000x1000")
             set_cover(filename, "cover.jpg")
             remove("cover.jpg")

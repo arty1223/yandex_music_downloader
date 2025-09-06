@@ -214,7 +214,7 @@ if __name__ == "__main__":
             # flename = filename.encode("ascii",'replace')
             print(filename, end=" ")
             print(
-                f"текущий трек {i} из {amount - 1}, {round(i / (amount - 1) * 100, 1)}%"
+                f"текущий трек {i} из {amount}, {round(i / (amount) * 100, 1)}%"
             )
             playlistfile.write(filename + "\n")
             if path.exists(filename):
@@ -232,7 +232,15 @@ if __name__ == "__main__":
                     print("файл существует, пропуск")
                     continue
             continiuty = 0
-            track.download(filename, codec=codec, bitrate_in_kbps=bitrate)
+
+            while(1): # перебираем битрейты пока не найдем рабочий
+                try:
+                    track.download(filename, codec=codec, bitrate_in_kbps=bitrate)
+                    break
+                except:
+                    bitrates = [64, 128, 192, 320].remove(bitrate)
+                    bitrate = bitrates[-1]
+
             track.download_cover("cover.jpg", size="1000x1000")
             set_cover(filename, "cover.jpg")
             remove("cover.jpg")

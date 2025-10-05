@@ -55,6 +55,7 @@ if __name__ == "__main__":
         from token_file import token
 
         client = Client(token).init()
+        
     except:
         print("Ошибка аутентификации, OAuth токен отсутствует")
         file = open("token_file.py", "w")
@@ -179,6 +180,7 @@ if __name__ == "__main__":
     filename = ""
     choice = True
     continiuty = 0
+    tracklist = tracklist.fetch_tracks()
     try:
         for i in range(amount):
             if continiuty > 100 and choice:
@@ -192,7 +194,7 @@ if __name__ == "__main__":
                 else:
                     print("вопросов больше не будет.")
                     choice = False
-            track = tracklist[i].fetch_track()
+            track = tracklist[i]
             # print(track)
             # exit()
             artist = ""
@@ -218,6 +220,7 @@ if __name__ == "__main__":
             )
             playlistfile.write(filename + "\n")
             if path.exists(filename):
+                continiuty += 1
                 if fix:
                     audio = music_tag.load_file(filename)
                     # if audio['artwork'] == 0:
@@ -226,8 +229,7 @@ if __name__ == "__main__":
                     remove("cover.jpg")
                     print("обложка установлена")
                     set_metadata(filename, track)
-                    continiuty -= 1
-                continiuty += 1
+                    continiuty -= 1                
                 if not recovery:
                     print("файл существует, пропуск")
                     continue

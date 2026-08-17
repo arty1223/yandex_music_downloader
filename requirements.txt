@@ -1,0 +1,4 @@
+###### Requirements without Version Specifiers ######
+yandex-music
+mutagen
+music_tag
